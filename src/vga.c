@@ -131,7 +131,7 @@ void vga_putc(char c)
 			}
 			else if (vga_py > 0)
 			{
-				while (vga_mem[VGA_POS] & 0xff == ' ')
+				while ((vga_mem[VGA_POS] & 0xff) == ' ')
 				{
 					vga_px--;
 				}
