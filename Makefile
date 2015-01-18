@@ -1,4 +1,4 @@
-TARGET = kernel
+TARGET = kernel.bin
 
 INCDIR=inc
 SRCDIR=src
@@ -36,5 +36,5 @@ clean:
 
 iso: $(TARGET)
 	mkdir -p $(ISODIR)/boot
-	cp $(TARGET) $(ISODIR)/boot/$(TARGET).iso
+	cp $(TARGET) $(ISODIR)/boot/$(TARGET)
 	grub-mkrescue -o $(TARGET).iso $(ISODIR)
