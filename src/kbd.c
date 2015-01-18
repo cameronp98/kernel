@@ -13,6 +13,10 @@
 uint8_t kbd_buffer[KBD_BUFFER_SIZE];
 size_t kbd_buffer_pos = 0;
 
+uint8_t kbd_shift = 0;
+uint8_t kbd_ctrl = 0;
+uint8_t kbd_alt = 0;
+
 const char kbd_layout_us[128] = {
 	0,  27, '1', '2', '3', '4', '5', '6', '7', '8',	/* 9 */
 	'9', '0', '-', '=', '\b',	/* Backspace */
@@ -59,18 +63,45 @@ void kbd_handler(registers_t *regs)
 
 	if (scancode & 0x80)
 	{
-		// a key was just released (i.e. ctrl, shift, alt ...)
+		scancode -= 0x80;
+
+		switch(scancode)
+		{
+			case 0x2a:
+				kbd_shift = 0;
+				break;
+			case 0x1d:
+				kbd_shift = 0;
+				break;
+			case 0x38:
+				kbd_alt = 0;
+				break;
+		}
+
 	}
 	else
 	{
 		// try to add the character to the keyboard buffer
 		if (kbd_buffer_pos < KBD_BUFFER_SIZE)
 		{
-			kbd_buffer[kbd_buffer_pos++] = kbd_layout_us[scancode];
+			switch(scancode)
+			{
+				case 0x2a:
+					kbd_shift = 1;
+					break;
+				case 0x1d:
+					kbd_shift = 1;
+					break;
+				case 0x38:
+					kbd_alt = 1;
+					break;
+				default:
+					kbd_buffer[kbd_buffer_pos++] = kbd_layout_us[scancode];
+			}
 		}
 		else
 		{
-			vga_log(WARN, "kdb_handler(): Keyboard buffer full\n");
+			vga_log(WARN, "kbd_handler(): Keyboard buffer full\n");
 		}
 	}
 
@@ -78,6 +109,10 @@ void kbd_handler(registers_t *regs)
 
 void kbd_init(void)
 {
+	kbd_alt = 0;
+	kbd_ctrl = 0;
+	kbd_shift = 0;
+	kbd_buffer_pos = 0;
 	irq_install(1, &kbd_handler);
 }
 
@@ -99,17 +134,31 @@ void kbd_retc(char c)
 		kbd_buffer[kbd_buffer_pos++] = c;
 	}
 
-	vga_log(WARN, "kdb_retc(): Keyboard buffer full\n");
+	vga_log(WARN, "kbd_retc(): Keyboard buffer full\n");
 }
 
-void kbd_gets(char *buffer)
+void kbd_gets(char *buffer, size_t size)
 {
+	const char *buffer_start = buffer;
+
 	char c;
 
 	while ((c = kbd_getc()) != '\n' && c != '\0')
 	{
-		*buffer++ = c;
-		vga_putc(c);
+		if (c == '\b') {
+			if (buffer > buffer_start)
+			{
+				size++;
+				*--buffer = 0;
+				vga_putc('\b');
+			}
+		}
+		else if (size > 0)
+		{
+			size--;
+			*buffer++ = c;
+			vga_putc(c);
+		}
 	}
 
 	vga_putc('\n');
