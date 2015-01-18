@@ -1,4 +1,4 @@
-TARGET = kernel.bin
+TARGET = kernel.iso
 
 INCDIR=inc
 SRCDIR=src
@@ -20,7 +20,10 @@ OBJECTS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.c.o,$(SOURCES))
 OBJECTS += $(patsubst $(SRCDIR)/%.s,$(OBJDIR)/%.s.o,$(ASM_SRC))
 
 $(TARGET): $(OBJECTS)
-	$(LD) -o $@ $^ $(LDFLAGS)
+	$(LD) $^ $(LDFLAGS)
+	mkdir -p $(ISODIR)/boot
+	mv a.out $(ISODIR)/boot/a.out
+	grub-mkrescue -o $(TARGET) $(ISODIR)
 
 $(OBJDIR)/%.s.o: $(SRCDIR)/%.s
 	$(AS) -o $@ $^ $(ASFLAGS)
@@ -33,8 +36,3 @@ $(OBJDIR)/%.c.o: $(SRCDIR)/%.c
 clean:
 	rm $(OBJECTS)
 	rm $(TARGET)
-
-iso: $(TARGET)
-	mkdir -p $(ISODIR)/boot
-	cp $(TARGET) $(ISODIR)/boot/$(TARGET)
-	grub-mkrescue -o $(TARGET).iso $(ISODIR)
