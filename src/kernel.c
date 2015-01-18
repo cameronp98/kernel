@@ -41,7 +41,7 @@ void kernel_main(void)
 	enable_interrupts();
 
 	// start doing stuff!
-	vga_fputs("[+%CMoonOS v0.1%O+] :: (C) Cameron Phillips 2014\n", COLOR_BLUE);
+	vga_fputs("[+%CToyKernel v0.0.1%O+] :: (C) Cameron Phillips 2014\n", COLOR_BLUE);
 
 	vga_puts("> ");
 	while (1)
