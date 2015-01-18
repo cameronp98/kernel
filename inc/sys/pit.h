@@ -9,4 +9,6 @@ void pit_init(uint32_t freq);
 
 uint32_t pit_get_ticks(void);
 
+void pit_sleep(uint32_t ticks);
+
 #endif /* SYS_TIMER_H */

@@ -4,6 +4,7 @@
 #include <sys/isr.h>
 #include <sys/kbd.h>
 #include <sys/gdt.h>
+#include <string.h>
 
 #define SYSTEM_TIMER_FREQ 50
 
@@ -43,13 +44,27 @@ void kernel_main(void)
 	// start doing stuff!
 	vga_fputs("[+%CToyKernel v0.0.1%O+] :: (C) Cameron Phillips 2014\n", COLOR_BLUE);
 
-	vga_puts("> ");
+	char buffer[64] = {0};
+
 	while (1)
 	{
-		vga_putc(kbd_getc());
+		vga_puts("> ");
+		memset(buffer, 0, 64);
+		kbd_gets(buffer);
+		if (strcmp(buffer, "help") == 0)
+		{
+			vga_puts("There is no help to be found...\n");
+		}
+		else if (strcmp(buffer, "exit") == 0)
+		{
+			vga_log(WARN, "Shutting down...");
+			pit_sleep(200);
+			break;
+		}
+		else
+		{
+			vga_fputs("unrecognized command '%s'\n", buffer);
+		}
 	}
-
-
-	for (;;);
 
 }

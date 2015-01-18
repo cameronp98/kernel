@@ -38,3 +38,14 @@ uint32_t pit_get_ticks(void)
 {
 	return pit_ticks;
 }
+
+void pit_sleep(uint32_t ticks)
+{
+	uint32_t start = pit_ticks;
+
+	while ((pit_ticks - start) < ticks)
+	{
+		// wait
+	}
+
+}

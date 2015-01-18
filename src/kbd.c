@@ -4,6 +4,7 @@
 #include <sys/io.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #define KBD_PORT_DATA 0x60
 
@@ -99,4 +100,18 @@ void kbd_retc(char c)
 	}
 
 	vga_log(WARN, "kdb_retc(): Keyboard buffer full\n");
+}
+
+void kbd_gets(char *buffer)
+{
+	char c;
+
+	while ((c = kbd_getc()) != '\n' && c != '\0')
+	{
+		*buffer++ = c;
+		vga_putc(c);
+	}
+
+	vga_putc('\n');
+
 }

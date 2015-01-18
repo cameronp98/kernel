@@ -8,4 +8,6 @@ void kbd_init(void);
 char kbd_getc(void);
 void kbd_retc(char c);
 
+void kbd_gets(char *buffer);
+
 #endif /* SYS_KBD_H */
