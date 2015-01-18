@@ -4,8 +4,11 @@
 #include <stdint.h>
 
 #define PIT_CLOCKS_PER_SEC 1193180
+#define PIT_FREQUENCY_DEFAULT 1000
 
-void pit_init(uint32_t freq);
+void pit_init(uint32_t frequency);
+
+void pit_set_frequency(uint32_t frequency);
 
 uint32_t pit_get_ticks(void);
 

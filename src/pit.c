@@ -10,16 +10,23 @@ uint32_t pit_ticks;
 
 void pit_handler(registers_t *regs)
 {
+
 	pit_ticks++;
+
 }
 
-void pit_init(uint32_t freq)
+void pit_init(uint32_t frequency)
 {
-	pit_frequency = freq;
-
 	pit_ticks = 0;
 
+	pit_set_frequency(frequency);
+
 	irq_install(0, &pit_handler);
+}
+
+void pit_set_frequency(uint32_t frequency)
+{
+	pit_frequency = frequency;
 
 	uint32_t divisor = PIT_CLOCKS_PER_SEC / pit_frequency;
 
@@ -31,7 +38,6 @@ void pit_init(uint32_t freq)
 
 	outb(0x40, lo);
 	outb(0x40, hi);
-
 }
 
 uint32_t pit_get_ticks(void)
