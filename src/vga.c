@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define VGA_POS (vga_px + vga_py * VGA_COLS)
+
 #define VGA_MEM 0x000B8000
 
 #define VGA_PORT_COMMAND 0x3D4
@@ -15,9 +17,6 @@
 #define VGA_COLS 80
 #define VGA_ROWS 25
 #define VGA_LAST_ROW (VGA_COLS * (VGA_ROWS - 1))
-
-#define VGA_FG_DEFAULT COLOR_LIGHT_GREY
-#define VGA_BG_DEFAULT COLOR_BLACK
 
 #define VGA_FG_INFO COLOR_CYAN
 #define VGA_FG_GOOD COLOR_GREEN
@@ -37,17 +36,16 @@ static void vga_make_entry(uint32_t i, int8_t c)
 
 static void vga_update_cursor(void)
 {
-	uint16_t pos = vga_px + vga_py * VGA_COLS;
 	outb(VGA_PORT_COMMAND, VGA_COMMAND_BYTE_HI);
-	outb(VGA_PORT_DATA, (pos >> 8) & 0xff);
+	outb(VGA_PORT_DATA, (VGA_POS >> 8) & 0xff);
 	outb(VGA_PORT_COMMAND, VGA_COMMAND_BYTE_LO);
-	outb(VGA_PORT_DATA, pos & 0xff);
+	outb(VGA_PORT_DATA, VGA_POS & 0xff);
 }
 
-void vga_init(void)
+void vga_init(vga_color_t fg, vga_color_t bg)
 {
-	vga_setfg(VGA_FG_DEFAULT);
-	vga_setbg(VGA_BG_DEFAULT);
+	vga_setfg(fg);
+	vga_setbg(bg);
 	vga_clear();
 	vga_px = 0;
 	vga_py = 0;
@@ -117,6 +115,8 @@ void vga_putc(char c)
 {
 	switch(c)
 	{
+		case '\0':
+			return;
 		case '\n':
 			vga_px = 0;
 			vga_py++;
@@ -131,14 +131,15 @@ void vga_putc(char c)
 			}
 			else if (vga_py > 0)
 			{
-				vga_py--;
+				while (vga_mem[VGA_POS] & 0xff == ' ')
+				{
+					vga_px--;
+				}
 			}
-			vga_make_entry(vga_px + vga_py * VGA_COLS, ' ');
+			vga_make_entry(VGA_POS, ' ');
 			break;
-		case '\0':
-			return;
 		default:
-			vga_make_entry(vga_px + vga_py * VGA_COLS , c);
+			vga_make_entry(VGA_POS , c);
 			vga_px++;
 			break;
 	}

@@ -4,6 +4,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#define VGA_FG_DEFAULT COLOR_LIGHT_GREY
+#define VGA_BG_DEFAULT COLOR_BLACK
+
 typedef enum vga_color
 {
 	COLOR_BLACK,
@@ -31,7 +34,7 @@ typedef enum
 
 /* housekeeping */
 
-void vga_init(void);
+void vga_init(vga_color_t fg, vga_color_t bg);
 
 void vga_clear(void);
 void vga_scroll(void);
