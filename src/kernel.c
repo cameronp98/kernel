@@ -6,7 +6,7 @@
 #include <sys/gdt.h>
 #include <string.h>
 
-#define SYSTEM_TIMER_FREQ 50
+#define PROMPT_BUFFER_SIZE 64
 
 void kernel_main(void)
 {
@@ -14,7 +14,7 @@ void kernel_main(void)
 	disable_interrupts();
 
 	// initialise VGA
-	vga_init();
+	vga_init(VGA_FG_DEFAULT, VGA_BG_DEFAULT);
 	vga_log(INFO, "VGA Initialised\n");
 
 	// initialise GDT
@@ -28,7 +28,7 @@ void kernel_main(void)
 	vga_fputs("%COK\n", COLOR_GREEN);
 
 	vga_log(INFO, "Initialising PIT... ");
-	pit_init(SYSTEM_TIMER_FREQ);
+	pit_init(PIT_FREQUENCY_DEFAULT);
 	vga_fputs("%COK\n", COLOR_GREEN);
 
 	// initialise Keyboard
@@ -44,22 +44,29 @@ void kernel_main(void)
 	// start doing stuff!
 	vga_fputs("[+%CToyKernel v0.0.1%O+] :: (C) Cameron Phillips 2014\n", COLOR_BLUE);
 
-	char buffer[64] = {0};
+	char buffer[PROMPT_BUFFER_SIZE] = {0};
 
 	while (1)
 	{
 		vga_puts("> ");
-		memset(buffer, 0, 64);
-		kbd_gets(buffer);
+		memset(buffer, 0, PROMPT_BUFFER_SIZE);
+		kbd_gets(buffer, PROMPT_BUFFER_SIZE);
 		if (strcmp(buffer, "help") == 0)
 		{
 			vga_puts("There is no help to be found...\n");
 		}
 		else if (strcmp(buffer, "exit") == 0)
 		{
-			vga_log(WARN, "Shutting down...");
-			pit_sleep(200);
+			vga_log(WARN, "Shutting down.");
+			pit_sleep(1000);
+			vga_putc('.');
+			pit_sleep(1000);
+			vga_putc('.');
 			break;
+		}
+		else if (strcmp(buffer, "clock") == 0)
+		{
+			vga_fputs("system timer: %d\n", pit_get_ticks());
 		}
 		else
 		{
